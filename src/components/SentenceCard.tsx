@@ -1,40 +1,47 @@
 import React from "react";
 import { Question } from "../types/Question";
+import { Button } from "../components/ui/Button";
 
 interface Props {
   question: Question;
-  selectedAnswer: string | null;
-  onSelect: (word: string) => void;
-  onUnselect: () => void;
+  selectedWords: string[];
+  onSelectWord: (word: string) => void;
+  onRemoveWord: (index: number) => void;
 }
 
-const SentenceCard: React.FC<Props> = ({ question, selectedAnswer, onSelect, onUnselect }) => {
-  const sentenceParts = question.sentence.split("___");
+const SentenceCard: React.FC<Props> = ({ question, selectedWords, onSelectWord, onRemoveWord }) => {
+  const blanks = question.correctAnswer.length;
+
+  const renderSentence = () => {
+    const parts = question.question.split("___");
+    return parts.map((part, i) => (
+      <React.Fragment key={i}>
+        <span>{part}</span>
+        {i < blanks && (
+          <button
+            className="border-b-2 border-gray-500 px-2 text-blue-700 font-medium mx-1"
+            onClick={() => onRemoveWord(i)}
+          >
+            {selectedWords[i] || "_______"}
+          </button>
+        )}
+      </React.Fragment>
+    ));
+  };
 
   return (
-    <div className="text-lg mb-6">
-      <p className="mb-4">
-        {sentenceParts[0]}
-        <span
-          onClick={() => selectedAnswer && onUnselect()}
-          className="inline-block border-b-2 border-dashed min-w-[60px] px-2 cursor-pointer hover:bg-gray-200"
-        >
-          {selectedAnswer || "______"}
-        </span>
-        {sentenceParts[1]}
-      </p>
-      <div className="flex flex-wrap gap-4">
+    <div className="p-4 border rounded-xl shadow bg-white space-y-4">
+      <p className="text-lg">{renderSentence()}</p>
+      <div className="flex flex-wrap gap-2">
         {question.options.map((option) => (
-          <button
+          <Button
             key={option}
-            className={`px-4 py-2 rounded bg-blue-100 hover:bg-blue-300 ${
-              selectedAnswer === option ? "bg-blue-500 text-white" : ""
-            }`}
-            onClick={() => onSelect(option)}
-            disabled={!!selectedAnswer}
+            variant="outline"
+            onClick={() => onSelectWord(option)}
+            disabled={selectedWords.includes(option)}
           >
             {option}
-          </button>
+          </Button>
         ))}
       </div>
     </div>
